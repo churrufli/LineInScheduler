@@ -15,7 +15,7 @@ Public Class Form1
     End Enum
 
     <ComImport, Guid("886D8EEB-8CF2-4446-8D02-CDBA1DBDCF99"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)>
-    Interface IPropertyStore
+    Public Interface IPropertyStore
 
         Function GetCount(<Out> ByRef propertyCount As UInteger) As HRESULT
 
@@ -44,7 +44,7 @@ Public Class Form1
         End Sub
 
         Private fmtid As Guid
-        Private pid As UInteger
+        Private ReadOnly pid As UInteger
     End Structure
 
     <StructLayout(LayoutKind.Sequential)>
@@ -115,7 +115,7 @@ Public Class Form1
     <ComImport>
     <Guid("A95664D2-9614-4F35-A746-DE8DB63617E6")>
     <InterfaceType(ComInterfaceType.InterfaceIsIUnknown)>
-    Interface IMMDeviceEnumerator
+    Public Interface IMMDeviceEnumerator
 
         Function EnumAudioEndpoints(dataFlow As EDataFlow, dwStateMask As Integer,
                                     <Out> ByRef ppDevices As IMMDeviceCollection) As HRESULT
@@ -142,7 +142,7 @@ Public Class Form1
     <ComImport>
     <Guid("0BD7A1BE-7A1A-44DB-8397-CC5392387B5E")>
     <InterfaceType(ComInterfaceType.InterfaceIsIUnknown)>
-    Interface IMMDeviceCollection
+    Public Interface IMMDeviceCollection
 
         Function GetCount(<Out> ByRef pcDevices As UInteger) As HRESULT
 
@@ -153,7 +153,7 @@ Public Class Form1
     <ComImport>
     <Guid("D666063F-1587-4E43-81F1-B948E807363F")>
     <InterfaceType(ComInterfaceType.InterfaceIsIUnknown)>
-    Interface IMMDevice
+    Public Interface IMMDevice
 
         Function Activate(ByRef iid As Guid, dwClsCtx As Integer, ByRef pActivationParams As PROPVARIANT,
                           <Out> ByRef ppInterface As IntPtr) As HRESULT
@@ -169,7 +169,7 @@ Public Class Form1
     <ComImport>
     <Guid("7991EEC9-7E89-4D85-8390-6C703CEC60C0")>
     <InterfaceType(ComInterfaceType.InterfaceIsIUnknown)>
-    Interface IMMNotificationClient
+    Public Interface IMMNotificationClient
 
         Function OnDeviceStateChanged(pwstrDeviceId As String, dwNewState As Integer) As HRESULT
 
@@ -186,7 +186,7 @@ Public Class Form1
     <ComImport>
     <Guid("1BE09788-6894-4089-8586-9A2A6C265AC5")>
     <InterfaceType(ComInterfaceType.InterfaceIsIUnknown)>
-    Interface IMMEndpoint
+    Public Interface IMMEndpoint
 
         Function GetDataFlow(<Out> ByRef pDataFlow As EDataFlow) As HRESULT
 
@@ -195,7 +195,7 @@ Public Class Form1
     <ComImport>
     <Guid("f8679f50-850a-41cf-9c72-430f290290c8")>
     <InterfaceType(ComInterfaceType.InterfaceIsIUnknown)>
-    Interface IPolicyConfig
+    Public Interface IPolicyConfig
 
         Function GetMixFormat(<[In]> <MarshalAs(UnmanagedType.LPWStr)> pszDeviceName As String,
                               <Out> ByRef ppFormat As WAVEFORMATEXTENSIBLE) As HRESULT
@@ -311,17 +311,18 @@ Public Class Form1
     Friend WithEvents ListView1 As ListView
     Friend WithEvents Button1 As Button
     Friend WithEvents Button2 As Button
-    ReadOnly groupRender As New ListViewGroup("Render")
-    ReadOnly groupCapture As New ListViewGroup("Capture")
-    ReadOnly colorDefault As Color = Color.GreenYellow
+    Private ReadOnly groupRender As New ListViewGroup("Render")
+    Private ReadOnly groupCapture As New ListViewGroup("Capture")
+    Private ReadOnly colorDefault As Color = Color.GreenYellow
 
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         ClientSize = New Size(800, 304)
-        Me.Text = "Test Core Audio APIs"
+        Text = "Test Core Audio APIs"
 
-        ListView1 = New ListView()
-        ListView1.Location = New Point(10, 10)
-        ListView1.Size = New Size(780, 230)
+        ListView1 = New ListView With {
+            .Location = New Point(10, 10),
+            .Size = New Size(780, 230)
+        }
         ListView1.Columns.Add("Device Name", 320, HorizontalAlignment.Left)
         ListView1.Columns.Add("Device ID", 350, HorizontalAlignment.Left)
         ListView1.Columns.Add("State", 100, HorizontalAlignment.Left)
@@ -334,23 +335,25 @@ Public Class Form1
         'ListView1.Groups.Add(groupRender)
         ListView1.Groups.Add(groupCapture)
 
-        Button1 = New Button()
-        Button1.Location = New Point(10, 260)
-        Button1.Name = "Button1"
-        Button1.Size = New Size(75, 23)
-        Button1.TabIndex = 0
-        Button1.Text = "Enable"
-        Button1.UseVisualStyleBackColor = True
+        Button1 = New Button With {
+            .Location = New Point(10, 260),
+            .Name = "Button1",
+            .Size = New Size(75, 23),
+            .TabIndex = 0,
+            .Text = "Enable",
+            .UseVisualStyleBackColor = True
+        }
         Controls.Add(Button1)
         Button1.Enabled = False
 
-        Button2 = New Button()
-        Button2.Location = New Point(95, 260)
-        Button2.Name = "Button2"
-        Button2.Size = New Size(100, 23)
-        Button2.TabIndex = 1
-        Button2.Text = "Set as Default"
-        Button2.UseVisualStyleBackColor = True
+        Button2 = New Button With {
+            .Location = New Point(95, 260),
+            .Name = "Button2",
+            .Size = New Size(100, 23),
+            .TabIndex = 1,
+            .Text = "Set as Default",
+            .UseVisualStyleBackColor = True
+        }
         Controls.Add(Button2)
         Button2.Enabled = False
 
@@ -491,7 +494,7 @@ Public Class Form1
         hacerclick()
     End Sub
 
-    Sub hacerclick()
+    Public Sub hacerclick()
 
         Dim hr = HRESULT.E_FAIL
         Dim CLSID_PolicyConfig = New Guid("{870af99c-171d-4f9e-af0d-e63df40c2bc9}")

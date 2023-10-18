@@ -5,7 +5,7 @@ Imports NAudio.Wave
 Public Class Main
     Public Shared NextGuideEvent As DataGridViewRow = Nothing
     Private ReadOnly currentMilliseconds As Integer = DateTime.Now.Millisecond
-    Private _audioCapture As WaveInEvent
+    Private ReadOnly _audioCapture As WaveInEvent
     Private _isCapturing As Boolean = False
 
     Private targetTime As DateTime
@@ -91,7 +91,7 @@ Public Class Main
         Next
     End Sub
 
-    Dim IsEnabledLineIn As Boolean = False
+    Private IsEnabledLineIn As Boolean = False
 
     Public Sub CloseLineIn()
         If IsEnabledLineIn = True Then
@@ -583,7 +583,6 @@ Public Class Main
         lbclock.Text = DateTime.Now.ToString("HH:mm:ss")
     End Sub
 
-
     Private Sub PerformCleanup()
         ' Realizar acciones de limpieza y liberación de recursos aquí
         StopCapture()
@@ -687,4 +686,5 @@ Public Class Main
     Private Sub AboutToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles AboutToolStripMenuItem.Click
         System.Diagnostics.Process.Start("http://www.google.es")
     End Sub
+
 End Class

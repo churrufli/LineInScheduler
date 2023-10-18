@@ -51,7 +51,7 @@ Partial Class AddConnection
         Me.btAdd.Name = "btAdd"
         Me.btAdd.Size = New System.Drawing.Size(204, 23)
         Me.btAdd.TabIndex = 13
-        Me.btAdd.Text = "Añadir"
+        Me.btAdd.Text = "Add Event"
         Me.btAdd.UseVisualStyleBackColor = False
         '
         'DateTimePicker2
