@@ -684,7 +684,7 @@ Public Class Main
     End Sub
 
     Private Sub AboutToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles AboutToolStripMenuItem.Click
-        System.Diagnostics.Process.Start("http://www.google.es")
+        System.Diagnostics.Process.Start("https://github.com/churrufli/LineInScheduler")
     End Sub
 
 End Class

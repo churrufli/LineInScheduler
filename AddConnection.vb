@@ -44,6 +44,9 @@
         If DateTimePicker2.Value > DateTimePicker1.Value Then
             ' El valor de DateTimePicker2 es mayor, puedes proceder con la acción que desees
             AddCn()
+            Main.NextGuideEvent = Nothing
+            Main.SaveGuideline()
+            Main.LoadGuideLine()
         Else
             ' El valor de DateTimePicker2 no es mayor, mostrar un mensaje de error
             MessageBox.Show("End time must be greater than start time")

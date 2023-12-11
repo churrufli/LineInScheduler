@@ -145,7 +145,7 @@ Public Class FnLineIn
                         process.MainWindowTitle.ToLower().Contains(applicationName.ToLower()) Then
                         ' Restaurar el volumen original
                         If originalVolumes.ContainsKey(processId) Then
-                            'session.SimpleAudioVolume.Volume = originalVolumes(processId)
+                            session.SimpleAudioVolume.Volume = originalVolumes(processId)
                             session.SimpleAudioVolume.Volume = 1
 
                             ' Eliminar el proceso de la lista para no restaurar el volumen nuevamente
