@@ -5,7 +5,6 @@ Public Class FnLineIn
 
     ' Constantes necesarias para la API de Windows Multimedia
     Private Const SND_ASYNC As Integer = &H1
-
     Private Const WAVE_VOLUME_MIN As Integer = 0
     Private Const WAVE_VOLUME_MAX As Integer = &HFFFF
     Private Const WAVE_OUT_SET_VOLUME As Integer = &H8
@@ -15,15 +14,6 @@ Public Class FnLineIn
     Private Shared Function WaveOutSetVolume(uDeviceID As Integer, dwVolume As Integer) As Integer
     End Function
 
-    ' Función para establecer el volumen en 0 de las aplicaciones que comienzan por "X"
-    Public Shared Sub EstablecerVolumenCero()
-        AjustarVolumen(0.0F)
-    End Sub
-
-    ' Función para establecer el volumen en 100 de las aplicaciones que comienzan por "X"
-    Public Shared Sub EstablecerVolumenCien()
-        AjustarVolumen(1.0F)
-    End Sub
 
     ' Función para ajustar el volumen de las aplicaciones que comienzan por "X"
     Private Shared Sub AjustarVolumen(volumen As Single)
@@ -31,10 +21,10 @@ Public Class FnLineIn
         Dim devices As MMDeviceCollection = enumerator.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active)
         If My.Settings.MuteProgram.ToString <> Nothing Then
             For Each device As MMDevice In devices
-                If device.DeviceFriendlyName.StartsWith("RADIT", StringComparison.OrdinalIgnoreCase) Then
+                If device.DeviceFriendlyName.StartsWith(My.Settings.MuteProgram, StringComparison.OrdinalIgnoreCase) Then
                     ' Establecer el volumen
                     device.AudioEndpointVolume.MasterVolumeLevelScalar = volumen
-                    Exit For ' Terminar después de encontrar la primera coincidencia
+                    'Exit For ' Terminar después de encontrar la primera coincidencia
                 End If
             Next
         End If
@@ -67,7 +57,7 @@ Public Class FnLineIn
         ' Ocultar el Form2
         form1.Hide()
 
-        Dim prefixToSearch = "RADIT"
+        Dim prefixToSearch = My.Settings.MuteProgram
         SetVolumeToZeroForApplication(prefixToSearch)
     End Sub
 
@@ -97,10 +87,8 @@ Public Class FnLineIn
         ' Ocultar el Form2
         form1.Hide()
         If My.Settings.MuteProgram.ToString <> Nothing Then
-
             RestoreOriginalVolumeForApplication(My.Settings.MuteProgram)
         End If
-
     End Sub
 
     ' Esta variable almacenará el volumen original de las aplicaciones
@@ -116,18 +104,26 @@ Public Class FnLineIn
                 Dim processId As Integer = session.GetProcessID
 
                 If processId > 0 Then
-                    Dim process As Process = Process.GetProcessById(processId)
-                    If _
-                        process IsNot Nothing AndAlso
-                        process.MainWindowTitle.ToLower().Contains(applicationName.ToLower()) Then
-                        ' Guardar el volumen original antes de establecerlo en cero
-                        originalVolumes(processId) = session.SimpleAudioVolume.Volume
-                        session.SimpleAudioVolume.Volume = 0.0F
-                    End If
+                    Try
+                        Dim process As Process = Process.GetProcessById(processId)
+                        If process IsNot Nothing AndAlso process.MainWindowTitle.ToLower().Contains(applicationName.ToLower()) Then
+                            ' Guardar el volumen original antes de establecerlo en 0
+                            If Not originalVolumes.ContainsKey(processId) Then
+                                originalVolumes(processId) = session.SimpleAudioVolume.Volume
+                                Console.WriteLine($"Guardando volumen de {process.ProcessName} con ID {processId}: {session.SimpleAudioVolume.Volume}")
+                            End If
+
+                            ' Establecer el volumen en 0
+                            session.SimpleAudioVolume.Volume = 0.0F
+                        End If
+                    Catch ex As Exception
+                        Console.WriteLine($"Error procesando {processId}: {ex.Message}")
+                    End Try
                 End If
             Next
         Next
     End Sub
+
 
     Public Shared Sub RestoreOriginalVolumeForApplication(applicationName As String)
         Dim deviceEnumerator As New MMDeviceEnumerator()
@@ -139,22 +135,27 @@ Public Class FnLineIn
                 Dim processId As Integer = session.GetProcessID
 
                 If processId > 0 Then
-                    Dim process As Process = Process.GetProcessById(processId)
-                    If _
-                        process IsNot Nothing AndAlso
-                        process.MainWindowTitle.ToLower().Contains(applicationName.ToLower()) Then
-                        ' Restaurar el volumen original
-                        If originalVolumes.ContainsKey(processId) Then
-                            session.SimpleAudioVolume.Volume = originalVolumes(processId)
-                            session.SimpleAudioVolume.Volume = 1
-
-                            ' Eliminar el proceso de la lista para no restaurar el volumen nuevamente
-                            originalVolumes.Remove(processId)
+                    Try
+                        Dim process As Process = Process.GetProcessById(processId)
+                        If process IsNot Nothing AndAlso process.MainWindowTitle.ToLower().Contains(applicationName.ToLower()) Then
+                            ' Restaurar el volumen solo si se guardó previamente
+                            If originalVolumes.ContainsKey(processId) Then
+                                session.SimpleAudioVolume.Volume = originalVolumes(processId)
+                                Console.WriteLine($"Restaurando volumen de {process.ProcessName} con ID {processId} a {originalVolumes(processId)}")
+                                ' Eliminar el proceso de la lista para evitar restauraciones redundantes
+                                originalVolumes.Remove(processId)
+                            Else
+                                Console.WriteLine($"No se encontró un volumen original para {process.ProcessName} con ID {processId}")
+                            End If
                         End If
-                    End If
+                    Catch ex As Exception
+                        Console.WriteLine($"Error procesando {processId}: {ex.Message}")
+                    End Try
                 End If
             Next
         Next
     End Sub
+
+
 
 End Class
